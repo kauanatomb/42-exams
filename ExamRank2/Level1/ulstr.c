@@ -17,3 +17,26 @@ $>./ulstr "3:21 Ba  tOut  moUn ki Ka di KE m'en Ka fe fot" | cat -e
 $>./ulstr | cat -e
 $
 */
+
+#include <unistd.h>
+
+void    replace_w(char *str)
+{
+    while (*str)
+    {
+        if (*str >= 'A' && *str <= 'Z')
+            *str += 32;
+        else if (*str >= 'a' && *str <= 'z')
+            *str -= 32;
+        write(1, str, 1);
+        str++;
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc == 2)
+        replace_w(argv[1]);
+    write(1, "\n", 1);
+    return (0); 
+}
