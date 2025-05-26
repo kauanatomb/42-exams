@@ -37,8 +37,8 @@ char    *ft_strdup(char *src)
     return (ft_strcmp(str, src));
 }
 
-int main(void)
-{
-    printf("%s", ft_strdup("Kauana123456"));
-    return (0);
-}
+// int main(void)
+// {
+//     printf("%s", ft_strdup("Kauana123456"));
+//     return (0);
+// }
