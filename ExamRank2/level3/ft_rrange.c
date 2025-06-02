@@ -32,19 +32,19 @@ int     *ft_rrange(int start, int end)
     return (range);
 }
 
-#include <stdio.h>
-int main()
-{
-    int start = 0;
-    int end = -3;
-    int size = (start < end) ? end - start + 1 : start - end + 1;
-    int *arr = ft_rrange(start, end);
-    if (!arr)
-        return (1);
-    for (int i = 0; i < size; i++)
-    {
-        printf("%d ", arr[i]);
-    }
-    free(arr);
-    return (0);
-}
+// #include <stdio.h>
+// int main()
+// {
+//     int start = 0;
+//     int end = -3;
+//     int size = (start < end) ? end - start + 1 : start - end + 1;
+//     int *arr = ft_rrange(start, end);
+//     if (!arr)
+//         return (1);
+//     for (int i = 0; i < size; i++)
+//     {
+//         printf("%d ", arr[i]);
+//     }
+//     free(arr);
+//     return (0);
+// }
