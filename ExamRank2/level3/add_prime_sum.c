@@ -34,7 +34,7 @@ int ft_str_to_nb(char *str)
 
 void ft_putnbr(int nbr)
 {
-    if (nbr > 10)
+    if (nbr > 9)
         ft_putnbr(nbr/10);
     write(1, &"0123456789"[nbr % 10], 1);
 }
