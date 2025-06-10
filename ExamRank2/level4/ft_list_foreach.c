@@ -35,7 +35,7 @@ void    ft_list_foreach(t_list *begin_list, void (*f)(void *))
     tmp_lst = begin_list;
     while (tmp_lst)
     {
-        (*f)tmp_lst->data;
+        f(tmp_lst->data);
         tmp_lst = tmp_lst->next;
     }
 }
