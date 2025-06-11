@@ -81,3 +81,35 @@ FFF0000F
 $>
 */
 
+typedef struct  s_point
+{
+    int x;
+    int y;
+}               t_point;
+
+#include "flood_fill.h"
+
+void fill(char **tab, t_point size, t_point p, char target)
+{
+    if (p.x < 0 || p.x >= size.x || p.y < 0 || p.y >= size.y)
+        return;
+    if (tab[p.y][p.x] != target)
+        return;
+    tab[p.y][p.x] = 'F';
+    t_point next;
+    next = (t_point){p.x + 1, p.y};
+    fill(tab, size, next, target);
+    next = (t_point){p.x - 1, p.y};
+    fill(tab, size, next, target);
+    next = (t_point){p.x, p.y + 1};
+    fill(tab, size, next, target);
+    next = (t_point){p.x, p.y - 1};
+    fill(tab, size, next, target);
+}
+
+void flood_fill(char **tab, t_point size, t_point begin)
+{
+    char target = tab[begin.y][begin.x];
+    if (target != 'F')
+        fill(tab, size, begin, target);
+}
