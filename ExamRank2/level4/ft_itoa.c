@@ -25,7 +25,6 @@ int     ft_nbr_len(int nbr)
 char    *ft_itoa(int nbr)
 {
     int len = ft_nbr_len(nbr);
-    printf("%d\n", len);
     char *str = malloc(len + 1);
     if (!str)
         return (0);
@@ -35,7 +34,6 @@ char    *ft_itoa(int nbr)
         nbr = -nbr;
         str[0] = '-';
     }
-    printf("%d\n", nbr);
     if (nbr == 0)
         str[0] = '0';
     len--;
