@@ -24,3 +24,42 @@ $> ./rev_wstr | cat -e
 $
 $>
 */
+
+#include <unistd.h>
+#include <stdio.h>
+
+int is_space(char c)
+{
+    return ((c >= 8 && c <= 13) || c == ' ');
+}
+
+int main(int argc, char *argv[])
+{
+    int i = 0;
+    if (argc == 2)
+    {
+        char *str = argv[1];
+        if (str[i])
+        {
+            while (str[i])
+                i++;
+            i--;
+        }
+        while (i >= 0)
+        {
+            while (!is_space(str[i]) && str[i] && i >= 0)
+                i--;
+            i++;
+            while (!is_space(str[i]) && str[i])
+                write(1, &str[i++], 1);
+            i--;
+            while (!is_space(str[i]) && str[i] && i >= 0)
+                i--;
+            if (is_space(str[i]))
+                write(1, " ", 1);
+            i--;
+        }
+    }
+    write(1, "\n", 1);
+    return (0);
+}
