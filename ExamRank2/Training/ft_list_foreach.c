@@ -30,24 +30,22 @@ void    ft_list_foreach(t_list *begin_list, void (*f)(void *))
 {
     if (!begin_list || !f)
         return ;
-    t_list *tmp = begin_list;
-    while (tmp)
+    while (begin_list)
     {
-        f(tmp->data);
-        tmp = tmp->next;
+        f(begin_list->data);
+        begin_list = begin_list->next;
     }
 }
 #include <stdio.h>
-void    print_node(void *node)
+void    print_node(void *s)
 {
-    printf("%s\n", (char *)node);
+    printf("%s", (char *)s);
 }
 
 int main()
 {
-    t_list node3 = {NULL, "Node3"};
-    t_list node2 = {&node3, "Node2"};
-    t_list nodes = {&node2, "Node"};
-    ft_list_foreach(&nodes, print_node);
+    t_list node = {NULL, "Node"};
+    t_list node2= {&node, "Node1"};
+    ft_list_foreach(&node2, print_node);
     return (0);
 }
