@@ -28,51 +28,31 @@ $
 $> ./fprime 42 21 | cat -e
 $
 */
-#include <unistd.h>
-int ft_atoi(char *str)
-{
-    int result = 0;
-    while (*str)
-    {
-        result *= 10;
-        result = result + *str - '0';
-        str++;
-    }
-    return (result);
-}
-
-void    ft_putnbr(int n)
-{
-    if (n > 9)
-        ft_putnbr(n / 10);
-    write(1, &"0123456789"[n % 10], 1);
-}
-
 #include <stdio.h>
+#include <stdlib.h>
+
 int main(int argc, char *argv[])
 {
     if (argc == 2)
     {
-        int nbr = ft_atoi(argv[1]);
-        if (nbr == 1)
-            write(1, &"1", 1);
+        int value = atoi(argv[1]);
+        if (value == 1)
+            printf("1");
         int i = 2;
-        while (i < nbr)
+        while (value > i)
         {
-            if (nbr % i == 0)
+            if (value % i == 0)
             {
-                ft_putnbr(i);
-                write(1, "*", 1);
-                nbr /= i;
+                printf("%d", i);
+                printf("*");
+                value /= i;
                 i = 1;
-            }    
+            }
             i++;
         }
-        if (nbr == i && nbr % i == 0)
-        {
-            ft_putnbr(i);
-        }
+        if (value == i && value % i == 0)
+            printf("%d", value);
     }
-    write(1, "\n", 1);
+    printf("\n");
     return (0);
 }
