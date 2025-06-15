@@ -18,24 +18,10 @@ $>./add_prime_sum | cat -e
 $>
 */
 #include <unistd.h>
-#include <stdio.h>
-int ft_atoi(char *str)
-{
-    int result = 0;
-    while (*str)
-    {
-        result *= 10;
-        result = result + *str - '0';
-        str++;
-    }
-    return (result);
-}
 
-int is_prime(int n)
+int     is_prime(int n)
 {
     int i = 2;
-    if (n < i)
-        return (0);
     while (n > i)
     {
         if (n % i == 0)
@@ -45,10 +31,29 @@ int is_prime(int n)
     return (1);
 }
 
-void    ft_putstr(int n)
+int ft_atoi(char *str)
+{
+    int sign = 1;
+    int result = 0;
+    if (*str == '+' || *str == '-')
+    {
+        if (*str == '-')
+            sign = -1;
+        str++;
+    }
+    while (*str)
+    {
+        result *= 10;
+        result = result + *str - '0';
+        str++;
+    }
+    return (result * sign);
+}
+
+void    putnbr(int n)
 {
     if (n > 9)
-        ft_putstr(n / 10);
+        putnbr(n / 10);
     write(1, &"0123456789"[n % 10], 1);
 }
 
@@ -57,11 +62,11 @@ int main(int argc, char *argv[])
     int sum = 0;
     if (argc == 2)
     {
-        int n = ft_atoi(argv[1]);
+        int value = ft_atoi(argv[1]);
         int i = 2;
-        if (n > 0 && n > 1)
+        if (value >= i)
         {
-            while (i <= n)
+            while (i <= value)
             {
                 if (is_prime(i))
                     sum += i;
@@ -69,7 +74,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-    ft_putstr(sum);
+    putnbr(sum);
     write(1, "\n", 1);
     return (0);
 }
