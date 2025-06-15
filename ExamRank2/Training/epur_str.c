@@ -22,32 +22,36 @@ $> ./epur_str "" | cat -e
 $
 $>
 */
+
 #include <unistd.h>
-int is_space(char c)
+
+int     is_space(char c)
 {
     return ((c >= 8 && c <= 13) || c == ' ');
 }
 
-int main(int argc, char *argv[])
+void    epur_str(char *str)
 {
     int first_word = 1;
-    if (argc == 2)
+    while (*str)
     {
-        char *str = argv[1];
-        while (*str)
+        while (is_space(*str) && *str)
+            str++;
+        if (*str)
         {
-            while (is_space(*str) && *str)
-                str++;
-            if (*str)
-            {
-                if (first_word == 0)
-                    write(1, " ", 1);
-                first_word = 0;
-                while (!is_space(*str) && *str)
-                    write(1, str++, 1);
-            }
+            if (!is_space(*str) && first_word == 0)
+                write(1, " ", 1);
+            first_word = 0;
+            while (!is_space(*str) && *str)
+                write(1, str++, 1);
         }
     }
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc == 2)
+        epur_str(argv[1]);
     write(1, "\n", 1);
     return (0);
 }
