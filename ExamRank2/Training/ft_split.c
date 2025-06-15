@@ -9,27 +9,23 @@ Your function must be declared as follows:
 
 char    **ft_split(char *str);
 */
-
 #include <stdlib.h>
-
-int is_space(char c)
+#include <stdio.h>
+int     is_space(char c)
 {
     return ((c >= 8 && c <= 13) || c == ' ');
 }
 
-int count_words(char *str)
+int     count_words(char *str)
 {
     int count = 0;
     while (*str)
     {
-        while(is_space(*str) && *str)
+        while (is_space(*str) && *str)
             str++;
-        if (!is_space(*str) && *str)
-        {
-            count++;
-            while (!is_space(*str) && *str)
-                str++;
-        }
+        while (!is_space(*str) && *str)
+            str++;
+        count++;
     }
     return (count);
 }
@@ -37,26 +33,23 @@ int count_words(char *str)
 char *fill_word(char *str, int size)
 {
     int i = 0;
-    char *str2 = malloc(size + 1);
-    if (!str2)
+    char *str_new = malloc(size + 1);
+    if (!str_new)
         return (NULL);
-    while (i < size)
+    while (size > i)
     {
-        str2[i] = str[i];
+        str_new[i] = str[i];
         i++;
     }
-    str2[i] = '\0';
-    return (str2);
+    str_new[i] = '\0';
+    return (str_new);
 }
 
-void    *free_result(char **strs, int size)
+void    *free_strs(char **strs, int size)
 {
     int i = 0;
-    while (i < size)
-    {
-        free(strs[i]);
-        i++;
-    }
+    while (size > i)
+        free(strs[i++]);
     free(strs);
     return (NULL);
 }
@@ -65,42 +58,37 @@ char    **ft_split(char *str)
 {
     if (!str)
         return (NULL);
+    int counted_words = count_words(str);
+    printf("%d\n", counted_words);
     char *start;
     int i = 0;
-    int word_counted = count_words(str);
-    char **result = malloc((word_counted + 1) * sizeof(char *));
-    if (!result)
+    char **strs = malloc((counted_words + 1) * sizeof(char *));
+    if (!strs)
         return (NULL);
     while (*str)
     {
         while (is_space(*str) && *str)
             str++;
-        if (!is_space(*str) && *str)
-        {
-            start = str;
-            while (!is_space(*str) && *str)
-                str++;
-            result[i] = fill_word(start, str - start);
-            if (!result[i])
-                free_result(result, i);
-            i++;
-        }
+        start = str;
+        while (!is_space(*str) && *str)
+            str++;
+        strs[i] = fill_word(start, str - start);
+        if (!strs[i])
+            free_strs(strs, i);
+        i++;
     }
-    result[i] = NULL;
-    return (result);
+    strs[i] = NULL;
+    return (strs);
 }
 
-#include <stdio.h>
 int main()
 {
-    int i = 0;
-    char **result = ft_split("kauana tombolato silva");
+    char **result = ft_split("kauana tombolato,     da  silva");
     if (!result)
         return (0);
+    int i = 0;
     while (result[i])
-    {
         printf("%s\n", result[i++]);
-    }
-    free_result(result, i);
+    free_strs(result, i);
     return (0);
 }
