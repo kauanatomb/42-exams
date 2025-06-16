@@ -9,8 +9,8 @@ Your function must be declared as follows:
 
 char    **ft_split(char *str);
 */
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 int     is_space(char c)
 {
     return ((c >= 8 && c <= 13) || c == ' ');
@@ -23,33 +23,38 @@ int     count_words(char *str)
     {
         while (is_space(*str) && *str)
             str++;
-        while (!is_space(*str) && *str)
-            str++;
-        count++;
+        if (*str)
+        {
+            count++;
+            while (!is_space(*str) && *str)
+                str++;
+        }
     }
     return (count);
 }
 
-char *fill_word(char *str, int size)
+char *fill_words(char *start, int size)
 {
-    int i = 0;
-    char *str_new = malloc(size + 1);
-    if (!str_new)
+    char *str = malloc(size + 1);
+    if (!str)
         return (NULL);
+    int i = 0;
     while (size > i)
     {
-        str_new[i] = str[i];
+        str[i] = start[i];
         i++;
     }
-    str_new[i] = '\0';
-    return (str_new);
+    str[i] = '\0';
+    return (str);
 }
 
 void    *free_strs(char **strs, int size)
 {
     int i = 0;
-    while (size > i)
+    while (i < size)
+    {
         free(strs[i++]);
+    }
     free(strs);
     return (NULL);
 }
@@ -59,23 +64,25 @@ char    **ft_split(char *str)
     if (!str)
         return (NULL);
     int counted_words = count_words(str);
-    printf("%d\n", counted_words);
-    char *start;
-    int i = 0;
     char **strs = malloc((counted_words + 1) * sizeof(char *));
     if (!strs)
         return (NULL);
+    char *start;
+    int i = 0;
     while (*str)
     {
         while (is_space(*str) && *str)
             str++;
         start = str;
-        while (!is_space(*str) && *str)
-            str++;
-        strs[i] = fill_word(start, str - start);
-        if (!strs[i])
-            free_strs(strs, i);
-        i++;
+        if (*str)
+        {
+            while (!is_space(*str) && *str)
+                str++;
+            strs[i] = fill_words(start, str - start);
+            if (!strs[i])
+                free_strs(strs, i);
+            i++;
+        }
     }
     strs[i] = NULL;
     return (strs);
@@ -83,12 +90,14 @@ char    **ft_split(char *str)
 
 int main()
 {
-    char **result = ft_split("kauana tombolato,     da  silva");
+    char **result = ft_split("ola kauana");
     if (!result)
         return (0);
     int i = 0;
     while (result[i])
+    {
         printf("%s\n", result[i++]);
+    }
     free_strs(result, i);
     return (0);
 }

@@ -39,7 +39,7 @@ int ascending(int a, int b)
 	return (a <= b);
 }
 
-void    swap_data(int *a, int *b)
+void    swap(int *a, int *b)
 {
     int tmp = *a;
     *a = *b;
@@ -53,7 +53,7 @@ t_list	*sort_list(t_list* lst, int (*cmp)(int, int))
     {
         if (cmp(*(int *)lst->data, *(int *)lst->next->data) == 0)
         {
-            swap_data(lst->data, lst->next->data);
+            swap((int *)lst->data, (int *)lst->next->data);
             lst = tmp;
         }
         else
@@ -64,17 +64,17 @@ t_list	*sort_list(t_list* lst, int (*cmp)(int, int))
 #include <stdio.h>
 int main()
 {
-    int a = 3;
-    int b = 6;
-    int c = 8;
-    t_list node3 = {NULL, &a};
+    int a = 9;
+    int b = 3;
+    int c = 5;
+    t_list node3 = {NULL, &c};
     t_list node2 = {&node3, &b};
-    t_list node1 = {&node2, &c};
-    t_list *result = sort_list(&node1, ascending);
-    while (result)
+    t_list node = {&node2, &a};
+    t_list *sorted = sort_list(&node, ascending);
+    while (sorted)
     {
-        printf("%d", *(int *)result->data);
-        result = result->next;
+        printf("%d", *(int *)sorted->data);
+        sorted = sorted->next;
     }
     return (0);
 }

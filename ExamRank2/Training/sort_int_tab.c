@@ -30,14 +30,13 @@ void sort_int_tab(int *tab, unsigned int size)
 #include <stdio.h>
 int main()
 {
-    int arr[] = {7, 3, 5, 9, 4, 2, 11};
-    unsigned int size = 7;
-    sort_int_tab(arr, size);
+    int n[] = {6, 4, 9, 5};
+    unsigned int size = 4;
+    sort_int_tab(n, size);
     unsigned int i = 0;
-    while(size > i)
+    while (size > i)
     {
-        printf("%d\n", arr[i]);
-        i++;
+        printf("%d", n[i++]);
     }
     return (0);
 }
