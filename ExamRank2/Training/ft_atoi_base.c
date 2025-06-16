@@ -21,7 +21,7 @@ int	ft_atoi_base(const char *str, int str_base)
     int sign = 1;
     int result = 0;
 
-    if (!str || str_base < 2)
+    if (!str || str_base < 2 || str_base > 16)
         return (0);
     while ((*str >= 8 && *str <= 13) || *str == ' ')
         str++;
@@ -39,10 +39,12 @@ int	ft_atoi_base(const char *str, int str_base)
             c += 32;
         if (c >= 'a' && c <= 'z')
             val = 10 + (c - 'a');
-        if (c >= '0' && c <= '9')
+        else if (c >= '0' && c <= '9')
             val = c - '0';
+        else
+            break ;
         if (val >= str_base)
-            return (0);
+            break ;
         result = result * str_base + val;
         str++;
     }
