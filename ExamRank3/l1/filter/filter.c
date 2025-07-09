@@ -35,7 +35,7 @@ $> echo 'ababcabababc' | ./filter ababc | cat -e
 #include <errno.h>
 #include <unistd.h>
 
-# define BUF_SIZE 4
+# define BUF_SIZE 2
 
 int	match_str(char *str1, char *str2)
 {
@@ -106,6 +106,17 @@ int	main(int argc, char *argv[])
 		leftover[total - i] = '\0';
 		free(tmp);
 		printf("leftover: %s\n", leftover);
+	}
+	if (rd < 0)
+	{
+		fprintf(stderr, "Error %s\n", strerror(errno));
+		free(leftover);
+		return (1);
+	}
+	if (leftover)
+	{
+		write(1, leftover, strlen(leftover));
+		free(leftover);
 	}
 	return (0);
 }
