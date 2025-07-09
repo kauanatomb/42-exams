@@ -82,7 +82,6 @@ int	main(int argc, char *argv[])
 		}
 		memcpy(tmp + left_len, buf, rd);
 		tmp[total] = '\0';
-		printf("tmp: %s\n", tmp);
 
 		int i = 0;
 		while (i <= total - needle_len)
@@ -105,7 +104,6 @@ int	main(int argc, char *argv[])
 		memcpy(leftover, &tmp[i], total - i);
 		leftover[total - i] = '\0';
 		free(tmp);
-		printf("leftover: %s\n", leftover);
 	}
 	if (rd < 0)
 	{
