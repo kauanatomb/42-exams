@@ -6,7 +6,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <errno.h>
 
 int str_match(char *s1, char *s2)
 {
@@ -43,7 +42,7 @@ int main(int argc, char *argv[])
         if (!tmp)
         {
             free(leftover);
-            fprintf(stderr, "Error: %s\n", strerror(errno));
+            perror("Error");
             return (1);
         }
         if (leftover)
@@ -70,7 +69,7 @@ int main(int argc, char *argv[])
         leftover = malloc(total + 1 - i);
         if (!leftover)
         {
-            fprintf(stderr, "Error: %s\n", strerror(errno));
+            perror("Error");
             free(tmp);
             return (1);
         }
@@ -80,7 +79,7 @@ int main(int argc, char *argv[])
     }
     if (rd < 0)
     {
-        fprintf(stderr, "Error: %s\n", strerror(errno));
+        perror("Error");
         free(leftover);
         return (1);
     }
