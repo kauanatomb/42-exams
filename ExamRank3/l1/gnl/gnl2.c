@@ -7,36 +7,38 @@ char *ft_strdup(char *str)
     int i = 0;
     while (str[i])
         i++;
-    char *res = malloc(i + 1);
+    char *str2 = malloc(i + 1);
+    if (!str2)
+        return (NULL);
     i = 0;
     while (str[i])
     {
-        res[i] = str[i];
+        str2[i] = str[i];
         i++;
     }
-    res[i] = '\0';
-    return (res);
+    str2[i] = '\0';
+    return (str2);
 }
 
 char *gnl(int fd)
 {
     if (fd < 0 || BUF_SIZE <= 0)
         return (NULL);
-    static char buf[BUF_SIZE];
     char line[70000];
-    static int b_read = 0;
-    static int read_buf = 0;
+    static int b_rd = 0;
+    static int pos_rd = 0;
+    static char buf[BUF_SIZE];
     int i = 0;
     while (1)
     {
-        if (read_buf >= b_read)
+        if (pos_rd >= b_rd)
         {
-            b_read = read(fd, buf, BUF_SIZE);
-            read_buf = 0;
-            if (b_read <= 0)
+            b_rd = read(fd, buf, BUF_SIZE);
+            pos_rd = 0;
+            if (b_rd <= 0)
                 break ;
         }
-        line[i] = buf[read_buf++];
+        line[i] = buf[pos_rd++];
         if (line[i++] == '\n')
             break ;
     }
@@ -48,13 +50,12 @@ char *gnl(int fd)
 
 int main(void)
 {
+    int fd = open("text.txt", O_RDONLY);
     char *res = " ";
-    int fd;
-    fd = open("text.txt", O_RDONLY);
     while (res != NULL)
     {
         res = gnl(fd);
-        printf("res: %s\n", res);
+        printf("%s\n", res);
         free(res);
     }
     free(res);
