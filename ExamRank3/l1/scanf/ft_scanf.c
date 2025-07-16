@@ -23,8 +23,7 @@ int match_char(FILE *f, char c)
         return (-1);
     if ((char)read_f == c)
         return (1);
-    if (read_f != EOF)
-        ungetc(read_f, f);
+    ungetc(read_f, f);
     return (0);
 }
 
@@ -53,8 +52,7 @@ int scan_int(FILE *f, va_list ap)
     }
     if (!isdigit(read_f))
     {
-        if (read_f != EOF)
-            ungetc(read_f, f);
+        ungetc(read_f, f);
         return (-1);
     }
     while (isdigit(read_f))
@@ -62,8 +60,7 @@ int scan_int(FILE *f, va_list ap)
         res = res * 10 + (read_f - '0');
         read_f = fgetc(f);
     }
-    if (read_f != EOF)
-        ungetc(read_f, f);
+    ungetc(read_f, f);
     int *nbr = va_arg(ap, int *);
     *nbr = res * sign;
     return (1);
@@ -159,5 +156,6 @@ int main()
     char letter;
 
     ft_scanf("%c has %d of %s", &letter, &age, word);
+    // scanf("%c has %d of %s hi", &letter, &age, word);
     printf("%c, %d, %s", letter, age, word);
 }
