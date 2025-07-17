@@ -1,64 +1,69 @@
-#include "gnl.h"
+#ifndef BUF_SIZE
+# define BUF_SIZE 4
+#endif
 
-char *ft_strdup(char *str)
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+char *ft_strdup(char *s)
 {
-    if (!str)
-        return (NULL);
+    if (!s)
+        return NULL;
     int i = 0;
-    while (str[i])
+    while (s[i])
         i++;
-    char *str2 = malloc(i + 1);
-    if (!str2)
-        return (NULL);
+    char *str = malloc(i + 1);
     i = 0;
-    while (str[i])
+    while (s[i])
     {
-        str2[i] = str[i];
+        str[i] = s[i];
         i++;
     }
-    str2[i] = '\0';
-    return (str2);
+    str[i] = '\0';
+    return str;
 }
 
 char *gnl(int fd)
 {
     if (fd < 0 || BUF_SIZE <= 0)
-        return (NULL);
-    char line[70000];
-    static int b_rd = 0;
-    static int pos_rd = 0;
-    static char buf[BUF_SIZE];
+        return NULL;
     int i = 0;
+    char line[70000];
+    static int b_read = 0;
+    static int pos = 0;
+    static char buf[BUF_SIZE];
     while (1)
     {
-        if (pos_rd >= b_rd)
+        if (pos >= b_read)
         {
-            b_rd = read(fd, buf, BUF_SIZE);
-            pos_rd = 0;
-            if (b_rd <= 0)
+            b_read = read(fd, buf, BUF_SIZE);
+            if (b_read <= 0)
                 break ;
+            pos = 0;
         }
-        line[i] = buf[pos_rd++];
+        line[i] = buf[pos++];
         if (line[i++] == '\n')
             break ;
     }
-    line[i] = '\0';
     if (i == 0)
-        return (NULL);
+        return NULL;
+    line[i] = '\0';
     return (ft_strdup(line));
 }
 
-int main(void)
+int main()
 {
     int fd = open("text.txt", O_RDONLY);
     char *res = " ";
     while (res != NULL)
     {
         res = gnl(fd);
-        printf("%s\n", res);
+        printf("%s", res);
         free(res);
     }
     free(res);
     close(fd);
-    return (0);
+    return 0;
 }
