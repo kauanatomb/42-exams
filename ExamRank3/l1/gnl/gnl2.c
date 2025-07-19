@@ -29,19 +29,19 @@ char *gnl(int fd)
 {
     if (fd < 0 || BUF_SIZE <= 0)
         return NULL;
-    int i = 0;
-    char line[70000];
-    static int b_read = 0;
     static int pos = 0;
+    static int read_b = 0;
     static char buf[BUF_SIZE];
+    char line[70000];
+    int i = 0;
     while (1)
     {
-        if (pos >= b_read)
+        if (pos >= read_b)
         {
-            b_read = read(fd, buf, BUF_SIZE);
-            if (b_read <= 0)
-                break ;
+            read_b = read(fd, buf, BUF_SIZE);
             pos = 0;
+            if (read_b <= 0)
+                break;
         }
         line[i] = buf[pos++];
         if (line[i++] == '\n')
