@@ -1,17 +1,17 @@
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #ifndef BUF_SIZE
 # define BUF_SIZE 4
 #endif
 
-int str_match(char *s, char *s2)
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+int str_match(char *s1, char *s2)
 {
-    while (*s && *s2 && *s == *s2)
+    while (*s1 && *s2 && *s1 == *s2)
     {
-        s++;
+        s1++;
         s2++;
     }
     if (*s2 == '\0')
@@ -21,22 +21,22 @@ int str_match(char *s, char *s2)
 
 void    print_starts(int i)
 {
-    while(i--)
+    while (i--)
         write(1, "*", 1);
 }
 
-int main (int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-    if (argc != 2)
+    if (argc != 2 || BUF_SIZE <= 0)
         return 1;
-    int len = strlen(argv[1]);
-    int b_read = 0;
     char *leftover = NULL;
-    char *buf[BUF_SIZE];
-    while ((b_read = read(0, buf, BUF_SIZE)) > 0)
+    int rd;
+    char buf[BUF_SIZE];
+    int needle_s = strlen(argv[1]);
+    while ((rd= read(0, buf, BUF_SIZE)) > 0)
     {
-        int left_len = leftover ? strlen(leftover) : 0;
-        int total = left_len + b_read;
+        int len = leftover ? strlen(leftover) : 0;
+        int total = rd + len;
         char *tmp = malloc(total + 1);
         if (!tmp)
         {
@@ -47,17 +47,17 @@ int main (int argc, char *argv[])
         tmp[total] = '\0';
         if (leftover)
         {
-            memmove(tmp, leftover, left_len);
+            memmove(tmp, leftover, len);
             free(leftover);
         }
-        memmove(tmp + left_len, buf, b_read);
+        memmove(tmp + len, buf, BUF_SIZE);
         int i = 0;
-        while (i < total - len)
+        while (i < total - needle_s)
         {
             if (str_match(&tmp[i], argv[1]))
             {
-                print_starts(len);
-                i += len;
+                print_starts(needle_s);
+                i += needle_s;
             }
             else
             {
@@ -73,13 +73,13 @@ int main (int argc, char *argv[])
             return 1;
         }
         memmove(leftover, &tmp[i], total - i);
-        leftover[total - i] = '\0';
         free(tmp);
+        leftover[total - i] = '\0';
     }
-    if (b_read < 0)
+    if (rd < 0)
     {
-        perror("Error");
         free(leftover);
+        perror("Error");
         return 1;
     }
     if (leftover)
@@ -87,5 +87,5 @@ int main (int argc, char *argv[])
         write(1, leftover, strlen(leftover));
         free(leftover);
     }
-    return 0;
+    return (0);
 }
