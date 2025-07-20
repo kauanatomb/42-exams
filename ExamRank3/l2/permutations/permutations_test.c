@@ -1,8 +1,8 @@
-#include <unistd.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 
-void    sort(char *s)
+void sort(char *s)
 {
     int i = 0;
     while (s[i])
@@ -22,29 +22,29 @@ void    sort(char *s)
     }
 }
 
-void    putline(char *s)
+void print_comb(char *s)
 {
     while (*s)
         write(1, s++, 1);
     write(1, "\n", 1);
 }
 
-void    backtrack(char *s, int len, int *used, char *perm, int depth)
+void backtrack(char *s, int size, int *used, char *perm, int depth)
 {
-    if (len == depth)
+    if (size == depth)
     {
-        perm[len] = '\0';
-        putline(perm);
+        perm[depth] = '\0';
+        print_comb(perm);
         return ;
     }
     int i = 0;
-    while (i < len)
+    while (i < size)
     {
         if (!used[i])
         {
             used[i] = 1;
             perm[depth] = s[i];
-            backtrack(s, len, used, perm, depth + 1);
+            backtrack(s, size, used, perm, depth + 1);
             used[i] = 0;
         }
         i++;
@@ -54,12 +54,14 @@ void    backtrack(char *s, int len, int *used, char *perm, int depth)
 int main(int argc, char *argv[])
 {
     if (argc != 2)
-        return (1);
+        return 1;
+    int size = strlen(argv[1]);
     sort(argv[1]);
-    int len = strlen(argv[1]);
-    int *used = calloc(len, sizeof(int));
-    char *perm = malloc(len + 1);
-    backtrack(argv[1], len, used, perm, 0);
+    int *used = calloc(sizeof(int), size);
+    char *perm = malloc(size + 1);
+    if (!perm)
+        return 1;
+    backtrack(argv[1], size, used, perm, 0);
     free(used);
     free(perm);
     return 0;
