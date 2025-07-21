@@ -1,27 +1,27 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-void    print_set(int *set, int size)
+void print_set(int *set, int size)
 {
     int i = 0;
-    while (i < size)
+    while(i < size)
     {
-        printf("%d%s", set[i], i == size - 1 ? "\n" : " ");
+        printf("%d%s", set[i], i == size-1 ? "\n" : " ");
         i++;
     }
 }
 
-void    backtrack(int *nums, int size, int index, int *set, int set_len, int sum, int target)
+void backtrack(int *nums, int index, int size, int *set, int len_set, int sum, int target)
 {
-    if (size == index)
+    if (index == size)
     {
         if (sum == target)
-            print_set(set, set_len);
+            print_set(set, len_set);
         return ;
     }
-    set[set_len] = nums[index];
-    backtrack(nums, size, index + 1, set, set_len + 1, sum + nums[index], target);
-    backtrack(nums, size, index + 1, set, set_len, sum, target);
+    set[len_set] = nums[index];
+    backtrack(nums, index + 1, size, set, len_set + 1, sum + nums[index], target);
+    backtrack(nums, index + 1, size, set, len_set, sum, target);
 }
 
 int main(int argc, char *argv[])
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
         nums[i] = atoi(argv[i + 2]);
         i++;
     }
-    backtrack(nums, size, 0, set, 0, 0, target);
+    backtrack(nums, 0, size, set, 0, 0, target);
     free(nums);
     free(set);
     return 0;

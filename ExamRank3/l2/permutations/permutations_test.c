@@ -68,4 +68,5 @@ int main(int argc, char *argv[])
     backtrack(argv[1], n, used, perm, 0);
     free(used);
     free(perm);
+    return 0;
 }
