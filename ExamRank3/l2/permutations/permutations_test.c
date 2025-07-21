@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <string.h>
 
 void sort(char *s)
@@ -22,7 +22,7 @@ void sort(char *s)
     }
 }
 
-void print_comb(char *s)
+void print_set(char *s)
 {
     while (*s)
         write(1, s++, 1);
@@ -34,7 +34,7 @@ void backtrack(char *s, int size, int *used, char *perm, int depth)
     if (size == depth)
     {
         perm[depth] = '\0';
-        print_comb(perm);
+        print_set(perm);
         return ;
     }
     int i = 0;
@@ -55,14 +55,17 @@ int main(int argc, char *argv[])
 {
     if (argc != 2)
         return 1;
-    int size = strlen(argv[1]);
-    sort(argv[1]);
-    int *used = calloc(sizeof(int), size);
-    char *perm = malloc(size + 1);
-    if (!perm)
+    int n = strlen(argv[1]);
+    int *used = calloc(sizeof(int), n);
+    char *perm = malloc(n + 1);
+    if (!used || !perm)
+    {
+        if (used) free(used);
+        if (perm) free(perm);
         return 1;
-    backtrack(argv[1], size, used, perm, 0);
+    }
+    sort(argv[1]);
+    backtrack(argv[1], n, used, perm, 0);
     free(used);
     free(perm);
-    return 0;
 }
