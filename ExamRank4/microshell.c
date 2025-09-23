@@ -66,7 +66,7 @@ int exec(char **argv, char **envp, int i)
     }
     waitpid(pid, &status, 0);
     if (has_pipe && setup_pipe_for_parent(fd))
-        return 1;
+        return err("error: fatal\n");
     if (WIFEXITED(status))
         return (WEXITSTATUS(status));
     return 1;
