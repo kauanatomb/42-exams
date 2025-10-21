@@ -1,13 +1,12 @@
-#include <string.h>
-#include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 
-
-int err(char *msg)
+int err(char *str)
 {
-    while (*msg)
-        write(2, msg++, 1);
+    while (*str)
+        write(2, str++, 1);
     return 1;
 }
 
@@ -20,29 +19,30 @@ int cd_cmd(char **argv, int i)
     return 0;
 }
 
-int setup_child(int fd[2])
+void prev_fd_exist(int *prev_fd)
+{
+    if (*prev_fd != -1)
+    {
+        dup2(*prev_fd, 0);
+        close(*prev_fd);
+    }
+    
+}
+
+int setup_pipe_for_child(int fd[2])
 {
     if (dup2(fd[1], 1) == -1)
         return err("error: fatal\n");
-    close(fd[1]);
     close(fd[0]);
+    close(fd[1]);
     return 0;
 }
 
-int setup_parent(int fd[2])
+int exec(char **argv, char **envp, int i, int *prev_fd)
 {
-    if (dup2(fd[0], 0) == -1)
-        return err("error: fatal\n");
-    close(fd[1]);
-    close(fd[0]);
-    return 0;
-}
-
-int exec_cmd(char **argv, int i, char **envp)
-{
-    int has_pipe = argv[i] && strcmp(argv[i], "|") == 0;
-    int status;
     int fd[2];
+    int status;
+    int has_pipe = argv[i] && strcmp(argv[i], "|") == 0;
     pid_t pid;
 
     if (has_pipe && pipe(fd) == -1)
@@ -53,7 +53,8 @@ int exec_cmd(char **argv, int i, char **envp)
     if (pid == 0)
     {
         argv[i] = NULL;
-        if (has_pipe && setup_child(fd))
+        prev_fd_exist(prev_fd);
+        if (has_pipe && setup_pipe_for_child(fd))
         {
             err("error: fatal\n");
             exit(1);
@@ -62,20 +63,31 @@ int exec_cmd(char **argv, int i, char **envp)
         err("error: cannot execute ");
         err(*argv);
         err("\n");
-        exit(127);
+        exit(126);
     }
-    if (has_pipe && setup_parent(fd))
-        return err("error: fatal\n");
+    if (has_pipe)
+    {
+        close(fd[1]);
+        if (*prev_fd != -1)
+            close(*prev_fd);
+        *prev_fd = fd[0];
+    }
+    else if (*prev_fd != -1)
+    {
+        close(*prev_fd);
+        *prev_fd = -1;
+    }
     waitpid(pid, &status, 0);
     if (WIFEXITED(status))
-        return WEXITSTATUS(status);
+        return (WEXITSTATUS(status));
     return 1;
 }
 
 int main(int argc, char **argv, char **envp)
 {
-    int status = 0;
     int i = 0;
+    int status = 0;
+    int prev_fd = -1;
     if (argc > 1)
     {
         while (argv[i] && argv[++i])
@@ -87,7 +99,7 @@ int main(int argc, char **argv, char **envp)
             if (strcmp(*argv, "cd") == 0)
                 status = cd_cmd(argv, i);
             else if (i)
-                status = exec_cmd(argv, i, envp);
+                status = exec(argv, envp, i, &prev_fd);
         }
     }
     return (status);
