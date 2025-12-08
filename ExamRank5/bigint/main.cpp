@@ -37,14 +37,5 @@ int main(void)
 	std::cout << "(d <= a) = " << (d <= a) << std::endl; // (d <= a) = 0
 	std::cout << "(d >= a) = " << (d >= a) << std::endl; // (d >= a) = 1
 
-	// extra
-	bigint x(12345678); bigint y(5);
-	std::cout << "(x << y) = " << (x << y) << ", x: " << x << ", y: " << y << std::endl;
-	std::cout << "(x >>= y) = " << (x >>= y) << ", x: " << x << ", y: " << y << std::endl;
-	std::cout << "(x >= y) = " << (x >= y) << ", x: " << x << ", y: " << y << std::endl;
-
-	std::cout << "x= " << (x <<= 5) << ", y= " << (y <<= 12) << std::endl;
-	std::cout << "(x >= y) = " << (x >= y) << ", x: " << x << ", y: " << y << std::endl;
-
 	return (0);
 }
