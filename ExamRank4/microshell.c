@@ -79,7 +79,6 @@ int exec(char **argv, char **envp, int i, int *prev_fd)
         *prev_fd = -1;
     }
     waitpid(pid, &status, 0);
-    printf("Parent4: fd[0]=%d fd[1]=%d\n", fd[0], fd[1]);
     if (WIFEXITED(status))
         return (WEXITSTATUS(status));
     return 1;
