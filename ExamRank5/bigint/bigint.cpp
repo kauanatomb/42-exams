@@ -2,6 +2,7 @@
 
 bigint::bigint() : str("0") {}
 bigint::bigint(unsigned int num) : str(std::to_string(num)) {}
+bigint::~bigint() {}
 bigint::bigint(const bigint& other) : str(other.str) {}
 bigint& bigint::operator=(const bigint& other) {
     if (this != &other) {
@@ -9,7 +10,6 @@ bigint& bigint::operator=(const bigint& other) {
     }
     return *this;
 }
-bigint::~bigint() {}
 
 std::string bigint::getStr() const {
     return str;
@@ -20,16 +20,15 @@ std::ostream& operator<<(std::ostream& out, const bigint& obj) {
     return out;
 }
 
-std::string sumString(std::string str1, std::string str2) {
-    int str1Len = str1.length() - 1;
-    int str2Len = str2.length() - 1;
-    std::string result;
+std::string sumStr(std::string str1, std::string str2) {
+    int len1 = str1.length() -1;
+    int len2 = str2.length() -1;
     int leftover = 0;
-
-    while (str1Len >= 0 || str2Len >= 0 || leftover) {
-        int sumStr1 = str1Len >= 0 ? str1[str1Len--] - '0' : 0;
-        int sumStr2 = str2Len >= 0 ? str2[str2Len--] - '0' : 0;
-        int sum = sumStr1 + sumStr2 + leftover;
+    std::string result;
+    while (len1 >= 0 || len2 >= 0 || leftover) {
+        int n1 = len1>= 0 ? str1[len1--] - '0' : 0;
+        int n2 = len2>= 0 ? str2[len2--] - '0' : 0;
+        int sum = n1 + n2 + leftover;
         result.push_back('0' + (sum % 10));
         leftover = sum / 10;
     }
@@ -38,41 +37,51 @@ std::string sumString(std::string str1, std::string str2) {
 }
 
 bigint bigint::operator+(const bigint& other) const {
-    bigint nBigInt;
-    nBigInt.str = sumString(str, other.str);
-    return nBigInt;
+    bigint tmp;
+    tmp.str = sumStr(str, other.str);
+    return tmp;
 }
 
+// Another faster way to do the operator+
+// bigint bigint::operator+(const bigint& other) const {
+//     bigint tmp;
+//     tmp.str = std::to_string(std::stoul(str) + std::stoul(other.str));
+//     return tmp;
+// }
+
 bigint& bigint::operator+=(const bigint& other) {
-    str = sumString(str, other.str);
+    *this = *this + other;
     return *this;
 }
 
 bigint& bigint::operator++() {
-    str = sumString(str, "1");
+    str = sumStr(str, "1");
     return *this;
 }
 
 bigint bigint::operator++(int) {
-    bigint nBigInt(*this);
-    this->str = sumString(nBigInt.str, "1");
-    return nBigInt;
+    bigint tmp(*this);
+    str = sumStr(tmp.str, "1");
+    return tmp;
 }
 
-bigint bigint::operator<<(unsigned int num) const {
+bigint bigint::operator<<(const unsigned int num) const {
     bigint tmp(*this);
     tmp.str.insert(tmp.str.end(), num, '0');
     return tmp;
 }
 
-bigint bigint::operator>>(unsigned int num) const {
+bigint bigint::operator>>(const unsigned int num) const {
+    size_t len = str.length();
     bigint tmp(*this);
-    size_t size = tmp.str.length();
-    size >= num ? tmp.str.erase(size - num, num) : tmp.str = "0";
+    if (len > num)
+        tmp.str.erase(len - num, num);
+    else
+        tmp.str = "0";
     return tmp;
 }
 
-bigint& bigint::operator<<=(unsigned int num) {
+bigint& bigint::operator<<=(const unsigned int num) {
     *this = *this << num;
     return *this;
 }
@@ -82,30 +91,31 @@ bigint& bigint::operator>>=(const bigint& other) {
     return *this;
 }
 
-bool bigint::operator<(const bigint& other) const { 
-    if (str.length() != other.str.length())
-        return str.length() < other.str.length();
-    return str < other.str;
-}
-
-bool bigint::operator>(const bigint& other) const { 
+bool bigint::operator>(const bigint& other) {
     if (str.length() != other.str.length())
         return str.length() > other.str.length();
     return str > other.str;
 }
 
-bool bigint::operator==(const bigint& other) const {
-    return (str == other.str );
+bool bigint::operator==(const bigint& other) {
+    return (this->str == other.str);
 }
 
-bool bigint::operator!=(const bigint& other) const {
-    return (str != other.str );
+bool bigint::operator!=(const bigint& other) {
+    return (this->str != other.str);
 }
 
-bool bigint::operator>=(const bigint& other) const {
-    return ((*this > other) || *this == other);
+bool bigint::operator>=(const bigint& other) {
+    return (*this > other || *this == other);
 }
 
-bool bigint::operator<=(const bigint& other) const {
-    return ((*this < other) || *this == other);
+
+bool bigint::operator<(const bigint& other) {
+    if (str.length() != other.str.length())
+        return str.length() < other.str.length();
+    return str < other.str;
+}
+
+bool bigint::operator<=(const bigint& other) {
+    return (*this < other || *this == other);
 }
