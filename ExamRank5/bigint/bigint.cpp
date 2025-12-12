@@ -55,13 +55,14 @@ bigint& bigint::operator+=(const bigint& other) {
 }
 
 bigint& bigint::operator++() {
-    str = sumStr(str, "1");
+    bigint tmp(1);
+    *this += tmp;
     return *this;
 }
 
 bigint bigint::operator++(int) {
     bigint tmp(*this);
-    str = sumStr(tmp.str, "1");
+    ++*this;
     return tmp;
 }
 
@@ -91,31 +92,26 @@ bigint& bigint::operator>>=(const bigint& other) {
     return *this;
 }
 
-bool bigint::operator>(const bigint& other) {
+bool bigint::operator<(const bigint& other) const {
+    if (str.length() != other.str.length())
+        return str.length() < other.str.length();
+    return str < other.str;
+}
+bool bigint::operator>(const bigint& other) const {
     if (str.length() != other.str.length())
         return str.length() > other.str.length();
     return str > other.str;
 }
 
-bool bigint::operator==(const bigint& other) {
-    return (this->str == other.str);
+bool bigint::operator==(const bigint& other) const {
+    return str == other.str;
 }
-
-bool bigint::operator!=(const bigint& other) {
-    return (this->str != other.str);
+bool bigint::operator<=(const bigint& other) const {
+    return (*this == other || *this < other);
 }
-
-bool bigint::operator>=(const bigint& other) {
-    return (*this > other || *this == other);
+bool bigint::operator>=(const bigint& other) const {
+    return (*this == other || *this > other);
 }
-
-
-bool bigint::operator<(const bigint& other) {
-    if (str.length() != other.str.length())
-        return str.length() < other.str.length();
-    return str < other.str;
-}
-
-bool bigint::operator<=(const bigint& other) {
-    return (*this < other || *this == other);
+bool bigint::operator!=(const bigint& other) const {
+    return str != other.str;
 }

@@ -28,12 +28,12 @@ class bigint {
         bigint& operator<<=(const unsigned int num);
         bigint& operator>>=(const bigint& other);
 
-        bool operator>(const bigint& other);
-        bool operator>=(const bigint& other);
-        bool operator<=(const bigint& other);
-        bool operator<(const bigint& other);
-        bool operator==(const bigint& other);
-        bool operator!=(const bigint& other);
+        bool operator<(const bigint& other) const;
+        bool operator>(const bigint& other) const;
+        bool operator==(const bigint& other) const;
+        bool operator<=(const bigint& other) const;
+        bool operator>=(const bigint& other) const;
+        bool operator!=(const bigint& other) const;
 };
 
 std::ostream& operator<<(std::ostream& out, const bigint& obj);
