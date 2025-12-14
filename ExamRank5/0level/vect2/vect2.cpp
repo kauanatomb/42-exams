@@ -29,7 +29,7 @@ int& vect2::operator[](int index) {
 }
 
 std::ostream& operator<<(std::ostream& out, const vect2& obj) {
-    std::cout << "{" << obj[0] << ", " << obj[1] << "}";
+    out << "{" << obj[0] << ", " << obj[1] << "}";
     return out;
 }
 
