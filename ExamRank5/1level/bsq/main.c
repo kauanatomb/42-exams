@@ -91,7 +91,7 @@ int process_map(FILE *file)
 		map[i] = malloc(width + 1);
 		if (!map[i])
 			return map_error_and_free(map, height, dp, line);
-		memcpy(map[i], line, width + 1);
+		memcpy(map[i], line, width + 1); // maybe not allowed
 
 		int prev_diag = 0;
 		for (int j = 0; j < width; j++)
