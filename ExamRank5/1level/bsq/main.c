@@ -16,7 +16,13 @@ static int	map_error(void)
 	return 1;
 }
 
-static int	map_error_and_free(char **map, int size, int **dp, char *line)
+static int	msg_error(void)
+{
+	fprintf(stderr, "Error: malloc or get next line\n");
+	return 1;
+}
+
+static int	map_error_and_free(char **map, int size, int **dp, char *line, int is_map)
 {
     if (map)
     {
@@ -24,14 +30,17 @@ static int	map_error_and_free(char **map, int size, int **dp, char *line)
         {
             if (map[i])
                 free(map[i]);
-			if (dp[i])
+			if (dp && dp[i])
 				free(dp[i]);
         }    
         free(map);
     }
     if (dp) free(dp);
     if (line) free(line);
-	return map_error();
+	if (is_map)
+		return map_error();
+	else
+		return msg_error();
 }
 
 int validate_header(FILE *file, int *height, char *obstacle, char *full, char *empty)
@@ -50,6 +59,21 @@ int validate_header(FILE *file, int *height, char *obstacle, char *full, char *e
     return 0;
 }
 
+void draw_square_on_map(char **map, char full, int best_i, int best_size, int best_j) {
+	for (int i = best_i - best_size + 1; i <= best_i; i++)
+		for (int j = best_j - best_size + 1; j <= best_j; j++)
+			map[i][j] = full;
+}
+
+void print_map_and_free(char **map, int **dp, int height) {
+	for (int i = 0; i < height; i++)
+	{
+		fprintf(stdout, "%s\n", map[i]);
+		free(map[i]);
+		free(dp[i]);
+	}
+}
+
 int process_map(FILE *file)
 {
 	int height;
@@ -66,41 +90,42 @@ int process_map(FILE *file)
 
     map = calloc(height, sizeof(char *));
 	if (!map)
-		return 1;
+		return msg_error();
 
 	dp = calloc(height, sizeof(int *));
 	if (!dp)
-		return map_error_and_free(map, height, dp, line);
+		return map_error_and_free(map, height, dp, line, 0); // malloc
 
 	/* main loop: read + validate + dp */
 	for (int i = 0; i < height; i++)
 	{
 		ssize_t n = getline(&line, &cap, file);
 		if (n <= 0)
-			return map_error_and_free(map, height, dp, line);
+			return map_error_and_free(map, height, dp, line, 0); // get next line
 
 		if (line[n - 1] != '\n')
-            return map_error_and_free(map, height, dp, line);
+            return map_error_and_free(map, height, dp, line, 1);
         else
 			line[--n] = 0;
 
 		if (width == -1)
 			width = n;
 		else if (n != width)
-			return map_error_and_free(map, height, dp, line);
+			return map_error_and_free(map, height, dp, line, 1);
 		dp[i] = calloc(width, sizeof(int));
 		if (!dp[i])
-			return map_error_and_free(map, height, dp, line);
+			return map_error_and_free(map, height, dp, line, 0); // malloc
 
 		map[i] = malloc(width + 1);
 		if (!map[i])
-			return map_error_and_free(map, height, dp, line);
-		memcpy(map[i], line, width + 1); // not allowed
+			return map_error_and_free(map, height, dp, line, 0); // malloc
+		for (int k = 0; k <= width; k++)
+    		map[i][k] = line[k];
 
 		for (int j = 0; j < width; j++)
 		{
 			if (map[i][j] != obstacle && map[i][j] != empty)
-                return map_error_and_free(map, height, dp, line);
+                return map_error_and_free(map, height, dp, line, 1);
 			else if (map[i][j] == obstacle)
 				dp[i][j] = 0;
 			else if (i == 0 || j == 0)
@@ -117,18 +142,9 @@ int process_map(FILE *file)
 		}
 	}
 
-	/* draw square */
-	for (int i = best_i - best_size + 1; i <= best_i; i++)
-		for (int j = best_j - best_size + 1; j <= best_j; j++)
-			map[i][j] = full;
+	draw_square_on_map(map, full, best_i, best_size, best_j);
 
-	/* output */
-	for (int i = 0; i < height; i++)
-	{
-		fprintf(stdout, "%s\n", map[i]);
-		free(map[i]);
-		free(dp[i]);
-	}
+	print_map_and_free(map, dp, height);
 
 	free(map);
 	free(dp);
