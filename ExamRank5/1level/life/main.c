@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <stdio.h>
 
+// board in 1D - practical
+
 void fill_board(char *board, int w, int h) {
     int j = 0, i = 0;
     int draw = 0;
