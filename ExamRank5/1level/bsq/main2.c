@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 int map_error() {
     fprintf(stderr, "map error\n");
@@ -11,45 +11,37 @@ int msg_error() {
     return 1;
 }
 
-int process_header(FILE *file, int *height, char *empty, char *obstacle, char *full) {
-    int read = fscanf(file, "%d%c%c%c\n", height, empty, obstacle, full);
-    if (read != 4 || height <= 0)
-        return 1;
-    if (*empty == *obstacle || *empty == *full || *full == *obstacle)
-        return 1;
-    if (*empty < 32 || *empty > 126 || *obstacle < 32 || *obstacle > 126 || *full < 32 || *full > 126)
-        return 1;
-    return 0;
-}
-
 int error_and_free(char **map, int **dp, char *line, int height, int is_map) {
     if (map) {
-        for (int i = 0; i < height; i++) {
+        for(int i = 0; i < height; i++) {
             if (map[i])
                 free(map[i]);
             if (dp && dp[i])
                 free(dp[i]);
         }
+        free(map);
     }
-    if (map) free(map);
     if (dp) free(dp);
     if (line) free(line);
-
     if (is_map)
         return map_error();
     else
         return msg_error();
 }
 
-int min3(int a, int b, int c) {
-    int min = a;
-    if (min > b) min = b;
-    if (min > c) min = c;
-    return min;
+int process_header(FILE *file, int *height, char *empty, char *obstacle, char *full) {
+    int read = fscanf(file, "%d%c%c%c\n", height, empty, obstacle, full);
+    if (read != 4 || height <= 0)
+        return 1;
+    if (*full == *obstacle || *full == *empty || *obstacle == *full)
+        return 1;
+    if (*full < 32 || *full > 126 || *obstacle < 32 || *obstacle > 126 || *empty < 32 || *empty > 126)
+        return 1;
+    return 0;
 }
 
 void full_map(char **map, int best_size, int best_i, int best_j, char full) {
-    for (int i = best_i - best_size + 1; i <= best_i; i++)
+    for(int i = best_i - best_size + 1; i <= best_i; i++)
         for(int j = best_j - best_size + 1; j <= best_j; j++)
             map[i][j] = full;
 }
@@ -60,6 +52,13 @@ void print_map_and_free(char **map, int **dp, int height) {
         free(map[i]);
         free(dp[i]);
     }
+}
+
+int min3(int a, int b, int c) {
+    int min = a;
+    if (min > b) min = b;
+    if (min > c) min = c;
+    return min;
 }
 
 int process_map(FILE *file) {
@@ -74,27 +73,25 @@ int process_map(FILE *file) {
 
     if (process_header(file, &height, &empty, &obstacle, &full))
         return map_error();
-
+    
     map = calloc(height, sizeof(char *));
     if (!map)
-        return map_error();
+        return msg_error();
     dp = calloc(height, sizeof(int *));
     if (!dp)
         return error_and_free(map, dp, line, height, 0);
-    
     for(int i = 0; i < height; i++) {
         ssize_t read = getline(&line, &cap, file);
         if (read <= 0)
             return error_and_free(map, dp, line, height, 1);
-        if (line[read - 1] != '\n')
+        if (line[read -1] != '\n')
             return error_and_free(map, dp, line, height, 1);
-        line[read -1] = 0;
+        line[read-1] = 0;
         --read;
         if (width == -1)
             width = read;
         else if (width != read)
             return error_and_free(map, dp, line, height, 1);
-        
         map[i] = calloc(width + 1, sizeof(char));
         if (!map[i])
             return error_and_free(map, dp, line, height, 0);
@@ -104,7 +101,7 @@ int process_map(FILE *file) {
         for(int k = 0; k < width; k++)
             map[i][k] = line[k];
         
-        for (int j = 0; j < width; j++) {
+        for(int j = 0; j < width; j++) {
             if (map[i][j] != obstacle && map[i][j] != empty)
                 return error_and_free(map, dp, line, height, 1);
             if (map[i][j] == obstacle)
@@ -113,7 +110,7 @@ int process_map(FILE *file) {
                 dp[i][j] = 1;
             else
                 dp[i][j] = 1 + min3(dp[i][j-1], dp[i-1][j], dp[i-1][j-1]);
-            
+
             if (dp[i][j] > best_size) {
                 best_size = dp[i][j];
                 best_i = i;
@@ -121,6 +118,7 @@ int process_map(FILE *file) {
             }
         }
     }
+
     full_map(map, best_size, best_i, best_j, full);
     print_map_and_free(map, dp, height);
 
@@ -130,11 +128,10 @@ int process_map(FILE *file) {
     return 0;
 }
 
-int main(int argc, char **argv) {
-    if (argc == 1) {
-        if (process_map(stdin))
-            return 1;
-    } else {
+int main(int argc, char** argv) {
+    if (argc == 1)
+        return process_map(stdin);
+    else {
         FILE *file = fopen(argv[1], "r");
         if (!file)
             return map_error();
