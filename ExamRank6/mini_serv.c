@@ -5,8 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <netinet/in.h>
-
-#define MAX_MSG_SIZE 10000
+#include <string.h>
 
 typedef struct {
     int id;
@@ -21,8 +20,8 @@ fd_set read_set;
 fd_set write_set;
 fd_set current;
 
-char send_buffer[MAX_MSG_SIZE];
-char recv_buffer[MAX_MSG_SIZE];
+char send_buffer[10000];
+char recv_buffer[10000];
 
 void putstr(int fd, char *str) {
     int i = 0;
@@ -92,14 +91,14 @@ int main(int argc, char** argv) {
                     if (connfd > maxfd)
                         maxfd = connfd;
                     clients[connfd].id = current_id;
-                    bzero(clients[connfd].msg, MAX_MSG_SIZE);
+                    bzero(clients[connfd].msg, 10000);
                     current_id++;
                     FD_SET(connfd, &current);
                     sprintf(send_buffer, "server: client %d just arrived\n", clients[connfd].id);
                     // Broadcast, except to new client
                     broadcast(connfd, send_buffer, sockfd);
                 } else {
-                    int ret = recv(fd, recv_buffer, MAX_MSG_SIZE, 0);
+                    int ret = recv(fd, recv_buffer, 10000, 0);
                     if (ret <= 0) {
                         remove_client(fd, sockfd);
                     } else {
@@ -111,7 +110,7 @@ int main(int argc, char** argv) {
                                 sprintf(send_buffer, "client %d: %s\n", clients[fd].id, clients[fd].msg);
                                 // Broadcast, except to remetente
                                 broadcast(fd, send_buffer, sockfd);
-                                bzero(clients[fd].msg, MAX_MSG_SIZE);
+                                bzero(clients[fd].msg, 10000);
                                 j = -1;
                             }
                         }
