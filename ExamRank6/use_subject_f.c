@@ -76,7 +76,7 @@ void bcast(int skip, int skipserver) {
 
 int main(int argc, char **argv) {
     if (argc != 2)
-        die("Fatal error\n");
+        die("Wrong number of arguments\n");
 
     int server = socket(AF_INET, SOCK_STREAM, 0);
     if (server < 0)
@@ -102,11 +102,14 @@ int main(int argc, char **argv) {
     while(1) {
         fd_set snapshot = cur;
         if (select(maxfd + 1, &snapshot, 0, 0, 0) == -1) {
+            //defensive but not mandatory since signal is not allowed
             for(int i = 0; i <= maxfd; i++) {
-                if (FD_ISSET(i, &snapshot))
+                if (FD_ISSET(i, &cur)) {
                     close(i);
-                exit(0);
+                    if (msg[i]) free(msg[i]);
+                }
             }
+            exit(0);
         }
         for(int fd = 0; fd <= maxfd; fd++) {
             if (!FD_ISSET(fd, &snapshot)) continue;
