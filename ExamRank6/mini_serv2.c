@@ -42,11 +42,9 @@ int main(int ac, char **av) {
     while (1) {
         fd_set rd = cur;
         if (select(maxfd + 1, &rd, 0, 0, 0) == -1) {
-            if (errno == EINTR) {
-                for (int i = 0; i <= maxfd; i++)
-                    if (FD_ISSET(i, &cur)) close(i);
-                exit(0);
-            }
+            for (int i = 0; i <= maxfd; i++)
+                if (FD_ISSET(i, &cur)) close(i);
+            exit(0);
             die("Fatal error\n");
         }
         for (int fd = 0; fd <= maxfd; fd++) {
