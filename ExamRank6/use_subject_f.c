@@ -14,6 +14,12 @@ char buf[4096];
 char tmp[4096];
 char *msg[1024];
 
+void die(char *s) {
+    write(2, s, strlen(s));
+    exit(1);
+}
+
+// copied subject
 int extract_message(char **buf, char **msg)
 {
 	char	*newbuf;
@@ -29,7 +35,7 @@ int extract_message(char **buf, char **msg)
 		{
 			newbuf = calloc(1, sizeof(*newbuf) * (strlen(*buf + i + 1) + 1));
 			if (newbuf == 0)
-				return (-1);
+				die("Fatal error\n");
 			strcpy(newbuf, *buf + i + 1);
 			*msg = *buf;
 			(*msg)[i + 1] = 0;
@@ -51,8 +57,7 @@ char *str_join(char *buf, char *add)
 	else
 		len = strlen(buf);
 	newbuf = malloc(sizeof(*newbuf) * (len + strlen(add) + 1));
-	if (newbuf == 0)
-		return (0);
+	if (!newbuf) die("Fatal error\n");
 	newbuf[0] = 0;
 	if (buf != 0)
 		strcat(newbuf, buf);
@@ -60,11 +65,7 @@ char *str_join(char *buf, char *add)
 	strcat(newbuf, add);
 	return (newbuf);
 }
-
-void die(char *s) {
-    write(2, s, strlen(s));
-    exit(1);
-}
+// my functions
 
 void bcast(int skip, int skipserver) {
     for (int fd = 0; fd <= maxfd; fd++) {
