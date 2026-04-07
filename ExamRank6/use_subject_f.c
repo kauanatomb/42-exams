@@ -11,7 +11,7 @@ int maxfd = 0;
 int ids = 0;
 int cid[1024];
 char buf[4096];
-char tmp[4096];
+char tmp[1001];
 char *msg[1024];
 
 void die(char *s) {
@@ -67,10 +67,38 @@ char *str_join(char *buf, char *add)
 }
 // my functions
 
-void bcast(int skip, int skipserver) {
+void bcast(int skip, int skipserver, char *buf) {
     for (int fd = 0; fd <= maxfd; fd++) {
         if (FD_ISSET(fd, &cur) && fd != skip && fd != skipserver)
             send(fd, buf, strlen(buf), 0);
+    }
+}
+
+void register_client(int fd, int server) {
+    cid[fd] = ids++;
+    msg[fd] = NULL;
+    FD_SET(fd, &cur);
+    sprintf(buf, "server: client %d just arrived\n", cid[fd]);
+    bcast(fd, server, buf);
+}
+
+void remove_client(int fd, int server) {
+    sprintf(buf, "server: client %d just left\n", cid[fd]);
+    bcast(fd, server, buf);
+    FD_CLR(fd, &cur);
+    free(msg[fd]);
+    msg[fd] = NULL;
+    close(fd);
+}
+
+void send_message(int fd, int server) {
+    msg[fd] = str_join(msg[fd], tmp);
+    char *line;
+    while (extract_message(&msg[fd], &line)) {
+        sprintf(buf, "client %d: ", cid[fd]);
+        bcast(fd, server, buf);
+        bcast(fd, server, line);
+        free(line);
     }
 }
 
@@ -101,15 +129,8 @@ int main(int argc, char **argv) {
     maxfd = server;
     while(1) {
         fd_set snapshot = cur;
-        if (select(maxfd + 1, &snapshot, 0, 0, 0) == -1) {
-            //defensive but not mandatory since signal is not allowed
-            for(int i = 0; i <= maxfd; i++) {
-                if (FD_ISSET(i, &cur)) {
-                    close(i);
-                    if (msg[i]) free(msg[i]);
-                }
-            }
-            exit(0);
+        if (select(maxfd + 1, &snapshot, 0, 0, 0) < 0) {
+            exit(1);
         }
         for(int fd = 0; fd <= maxfd; fd++) {
             if (!FD_ISSET(fd, &snapshot)) continue;
@@ -118,28 +139,14 @@ int main(int argc, char **argv) {
                 if (c < 0)
                     die("Fatal error\n");
                 if (c > maxfd) maxfd = c;
-                cid[c] = ids++;
-                FD_SET(c, &cur);
-                sprintf(buf, "server: client %d just arrived\n", cid[c]);
-                bcast(c, server);
+                register_client(c, server);
             } else {
-                int r = recv(fd, tmp, sizeof(tmp), 0);
+                int r = recv(fd, tmp, 1000, 0);
                 if (r <= 0) {
-                    sprintf(buf, "server: client %d just left\n", cid[fd]);
-                    bcast(fd, server);
-                    FD_CLR(fd, &cur);
-                    free(msg[fd]);
-                    msg[fd] = NULL;
-                    close(fd);
+                    remove_client(fd, server);
                 } else {
                     tmp[r] = '\0';
-                    msg[fd] = str_join(msg[fd], tmp);
-                    char *line;
-                    while (extract_message(&msg[fd], &line)) {
-                        sprintf(buf, "client %d: %s", cid[fd], line);
-                        bcast(fd, server);
-                        free(line);
-                    }
+                    send_message(fd, server);
                 }
             }
         }

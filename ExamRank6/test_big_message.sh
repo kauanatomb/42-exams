@@ -5,7 +5,7 @@ nc 127.0.0.1 $PORT > /tmp/received.txt &
 RECEIVER=$!
 sleep 0.2
 
-MSG=$(python3 -c "print('A' * 8000)")
+MSG=$(python3 -c "print('A' * 10000)")
 
 exec 3<>/dev/tcp/127.0.0.1/$PORT
 printf "%s\n" "$MSG" >&3
