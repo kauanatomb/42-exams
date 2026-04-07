@@ -12,7 +12,7 @@ fd_set  cur;
 char    buf[4096];
 char    tmp[4096];
 char    msg[1024][4096];
-int     mid[1024], mlen[1024];
+int     cid[1024], mlen[1024];
 
 void    die(char *s) { write(2, s, strlen(s)); exit(1); }
 
@@ -21,51 +21,57 @@ void    bcast(int skip, int srv) {
         if (FD_ISSET(i, &cur) && i != skip && i != srv)
             send(i, buf, strlen(buf), 0);
 }
+int main(int argc, char **argv) {
+    if (argc != 2)
+        die("Wrong number of arguments\n");
 
-int main(int ac, char **av) {
-    if (ac != 2) die("Wrong number of arguments\n");
-
-    int srv = socket(AF_INET, SOCK_STREAM, 0);
-    if (srv < 0) die("Fatal error\n");
-
+    int server = socket(AF_INET, SOCK_STREAM, 0);
+    if (server < 0)
+        die("Fatal error\n");
+    //bind
     struct sockaddr_in sa;
     bzero(&sa, sizeof(sa));
-    sa.sin_family      = AF_INET;
-    sa.sin_addr.s_addr = htonl(0x7F000001);
-    sa.sin_port        = htons(atoi(av[1]));
-
-    if (bind(srv, (struct sockaddr*)&sa, sizeof(sa))) die("Fatal error\n");
-    if (listen(srv, 10)) die("Fatal error\n");
-
+    sa.sin_family = AF_INET;
+    sa.sin_port = htons(atoi(argv[1]));
+    sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    if (bind(server, (const struct sockaddr *)&sa, sizeof(sa))) {
+        close(server);
+        die("Fatal error\n");
+    }
+    //listen
+    if (listen(server, 10)) {
+        close(server);
+        die("Fatal error\n");
+    }
     FD_ZERO(&cur);
-    FD_SET(srv, &cur);
-    maxfd = srv;
-
-    while (1) {
-        fd_set rd = cur;
-        if (select(maxfd + 1, &rd, 0, 0, 0) == -1) {
-            if (errno == EINTR) {
-                for (int i = 0; i <= maxfd; i++)
-                    if (FD_ISSET(i, &cur)) close(i);
+    FD_SET(server, &cur);
+    maxfd = server;
+    while(1) {
+        fd_set snapshot = cur;
+        if (select(maxfd + 1, &snapshot, 0, 0, 0) == -1) {
+            for(int i = 0; i <= maxfd; i++) {
+                if (FD_ISSET(i, &snapshot))
+                    close(i);
                 exit(0);
             }
         }
-        for (int fd = 0; fd <= maxfd; fd++) {
-            if (!FD_ISSET(fd, &rd)) continue;
-            if (fd == srv) {
-                int c = accept(srv, 0, 0);
-                if (c < 0) die("Fatal error\n");
+        for(int fd = 0; fd <= maxfd; fd++) {
+            if (!FD_ISSET(fd, &snapshot)) continue;
+            if (fd == server) {
+                int c = accept(fd, 0,0);
+                if (c < 0)
+                    die("Fatal error\n");
                 if (c > maxfd) maxfd = c;
-                mid[c]  = ids++;
+                cid[c] = ids++;
                 mlen[c] = 0;
                 FD_SET(c, &cur);
-                sprintf(buf, "server: client %d just arrived\n", mid[c]);
-                bcast(c, srv);
+                sprintf(buf, "server: client %d just arrived\n", cid[c]);
+                bcast(c, server);
             } else {
                 int r = recv(fd, tmp, sizeof(tmp), 0);
                 if (r <= 0) {
-                    sprintf(buf, "server: client %d just left\n", mid[fd]);
-                    bcast(fd, srv);
+                    sprintf(buf, "server: client %d just left\n", cid[fd]);
+                    bcast(fd, server);
                     FD_CLR(fd, &cur);
                     close(fd);
                 } else {
@@ -74,8 +80,8 @@ int main(int ac, char **av) {
                         msg[fd][j] = tmp[i];
                         if (tmp[i] == '\n') {
                             msg[fd][j] = '\0';
-                            sprintf(buf, "client %d: %s\n", mid[fd], msg[fd]);
-                            bcast(fd, srv);
+                            sprintf(buf, "client %d: %s\n", cid[fd], msg[fd]);
+                            bcast(fd, server);
                             j = 0;
                         } else j++;
                     }
