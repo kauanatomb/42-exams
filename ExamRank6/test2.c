@@ -40,23 +40,25 @@ int main(int argc, char **argv) {
     sa.sin_family = AF_INET;
     sa.sin_port = htons(atoi(argv[1]));
     sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    if (bind(server, (const struct sockaddr *)&sa, sizeof(sa)))
+    if (bind(server, (const struct sockaddr *)&sa, sizeof(sa))) {
+        close(server);
         die("Fatal error\n");
+    }
     //listen
-    if (listen(server, 10))
+    if (listen(server, 10)) {
+        close(server);
         die("Fatal error\n");
+    }
     FD_ZERO(&cur);
     FD_SET(server, &cur);
     maxfd = server;
     while(1) {
         fd_set snapshot = cur;
         if (select(maxfd + 1, &snapshot, 0, 0, 0) == -1) {
-            if (errno == EINTR) {
-                for(int i = 0; i <= maxfd; i++) {
-                    if (FD_ISSET(i, &snapshot))
-                        close(i);
-                    exit(0);
-                }
+            for(int i = 0; i <= maxfd; i++) {
+                if (FD_ISSET(i, &snapshot))
+                    close(i);
+                exit(0);
             }
         }
         for(int fd = 0; fd <= maxfd; fd++) {
