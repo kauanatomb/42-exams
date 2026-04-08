@@ -5,7 +5,7 @@ nc 127.0.0.1 $PORT > /tmp/received.txt &
 RECEIVER=$!
 sleep 0.2
 
-MSG=$(python3 -c "print('A' * 10000)")
+MSG=$(python3 -c "print('A' * 100000)")
 
 exec 3<>/dev/tcp/127.0.0.1/$PORT
 printf "%s\n" "$MSG" >&3
@@ -19,11 +19,11 @@ echo "=== received ==="
 cat /tmp/received.txt
 
 echo "=== expected ==="
-echo "client 1: $(python3 -c "print('A' * 10000)")"
+echo "client 1: $(python3 -c "print('A' * 100000)")"
 
 echo "=== diff ==="
 RECEIVED=$(grep "client 1:" /tmp/received.txt | sed 's/client 1: //')
-EXPECTED=$(python3 -c "print('A' * 10000)")
+EXPECTED=$(python3 -c "print('A' * 100000)")
 if [ "$RECEIVED" = "$EXPECTED" ]; then
     echo "OK"
 else

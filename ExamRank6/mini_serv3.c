@@ -9,9 +9,9 @@
 
 int     maxfd, ids;
 fd_set  cur;
-char    buf[4096];
-char    tmp[4096];
-char    msg[1024][4096];
+char    buf[110000];
+char    tmp[110001];
+char    msg[1024][110000];
 int     cid[1024], mlen[1024];
 
 void    die(char *s) { write(2, s, strlen(s)); exit(1); }
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
                 sprintf(buf, "server: client %d just arrived\n", cid[c]);
                 bcast(c, server);
             } else {
-                int r = recv(fd, tmp, sizeof(tmp), 0);
+                int r = recv(fd, tmp, 110000, 0);
                 if (r <= 0) {
                     sprintf(buf, "server: client %d just left\n", cid[fd]);
                     bcast(fd, server);
@@ -80,7 +80,9 @@ int main(int argc, char **argv) {
                         msg[fd][j] = tmp[i];
                         if (tmp[i] == '\n') {
                             msg[fd][j] = '\0';
-                            sprintf(buf, "client %d: %s\n", cid[fd], msg[fd]);
+                            sprintf(buf, "client %d: ", cid[fd]);
+                            bcast(fd, server);
+                            sprintf(buf, "%s\n", msg[fd]);
                             bcast(fd, server);
                             j = 0;
                         } else j++;
